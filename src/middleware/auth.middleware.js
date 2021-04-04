@@ -32,7 +32,12 @@ const verifyLogin =async (ctx, next)=>{
 const verifyAuth = async (ctx,next)=>{
   // 1.获取token
   const authorization = ctx.headers.authorization
+  if(!authorization) {
+    const error = new Error(errorType.UNAUTHORIZATION)
+    return ctx.app.emit('error',error,ctx)
+  }
   const token = authorization.replace('Bearer ','')
+
   // 2.验证token
   try {
     const result = jwt.verify(token,PUBLIC_KEY,{
@@ -41,7 +46,6 @@ const verifyAuth = async (ctx,next)=>{
     ctx.user = result
     await next()
   } catch (err) {
-    console.log(6666);
     const error = new Error(errorType.UNAUTHORIZATION)
     ctx.app.emit('error',error,ctx)
   }

@@ -23,6 +23,14 @@ const errorHandler = (error, ctx) => {
       status = 401;
       message = "无效token"
       break;
+    case errorType.DEVICE_ALREADY_EXISTS:
+      status = 409;
+      message = "设备已被绑定"
+      break;
+    case errorType.DEVICE_ISNOT_EXISTS:
+        status = 409;
+        message = "设备不存在"
+        break;
     default:
       status = 404;
       message = "NOT FOUND"

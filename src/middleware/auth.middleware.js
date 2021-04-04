@@ -1,6 +1,9 @@
+const jwt = require('jsonwebtoken')
+
 const errorType = require('../constants/error.types')
 const service = require('../service/user.service')
 const md5password = require('../utils/password-handle')
+const {PUBLIC_KEY} = require('../app/config')
 const verifyLogin =async (ctx, next)=>{
   // 1.获取用户名和密码
   const {name,password} = ctx.request.body;
@@ -21,7 +24,29 @@ const verifyLogin =async (ctx, next)=>{
     const error = new Error(errorType.PASSWORD_IS_INCORRENT)
     return ctx.app.emit('error',error,ctx);
   }
+
+  ctx.user = user
   await next()
 }
 
-module.exports = {verifyLogin}
+const verifyAuth = async (ctx,next)=>{
+  // 1.获取token
+  const authorization = ctx.headers.authorization
+  const token = authorization.replace('Bearer ','')
+  // 2.验证token
+  try {
+    const result = jwt.verify(token,PUBLIC_KEY,{
+      algorithms:["RS256"]
+    })
+    ctx.user = result
+    await next()
+  } catch (err) {
+    console.log(6666);
+    const error = new Error(errorType.UNAUTHORIZATION)
+    ctx.app.emit('error',error,ctx)
+  }
+ 
+ 
+}
+
+module.exports = {verifyLogin,verifyAuth}
